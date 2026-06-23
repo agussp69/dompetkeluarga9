@@ -161,7 +161,7 @@ function Dashboard() {
                 </defs>
                 <XAxis dataKey="label" fontSize={11} stroke="var(--color-muted-foreground)" tickLine={false} axisLine={false} />
                 <YAxis fontSize={11} stroke="var(--color-muted-foreground)" tickLine={false} axisLine={false} tickFormatter={(v) => formatCompact(v)} width={70} />
-                <Tooltip formatter={(v: number) => formatIDR(v)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
+                <Tooltip formatter={(v: any) => formatIDR(v as number)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
                 <Area type="monotone" dataKey="income" stroke="var(--color-success)" fill="url(#inc)" strokeWidth={2} />
                 <Area type="monotone" dataKey="expense" stroke="var(--color-destructive)" fill="url(#exp)" strokeWidth={2} />
               </AreaChart>
@@ -179,7 +179,7 @@ function Dashboard() {
                   <Pie data={data.pie} dataKey="value" nameKey="name" outerRadius={70} innerRadius={45}>
                     {data.pie.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip formatter={(v: number) => formatIDR(v)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
+                  <Tooltip formatter={(v: any) => formatIDR(v as number)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -200,7 +200,7 @@ function Dashboard() {
               <BarChart data={data?.months ?? []}>
                 <XAxis dataKey="label" fontSize={11} stroke="var(--color-muted-foreground)" tickLine={false} axisLine={false} />
                 <YAxis fontSize={11} stroke="var(--color-muted-foreground)" tickLine={false} axisLine={false} tickFormatter={(v) => formatCompact(v)} width={70} />
-                <Tooltip formatter={(v: number) => formatIDR(v)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
+                <Tooltip formatter={(v: any) => formatIDR(v as number)} contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 6, fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="income" name="Pemasukan" fill="var(--color-success)" radius={[2,2,0,0]} />
                 <Bar dataKey="expense" name="Pengeluaran" fill="var(--color-destructive)" radius={[2,2,0,0]} />
