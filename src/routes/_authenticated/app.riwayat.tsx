@@ -37,7 +37,7 @@ function HistoryPage() {
 
       let q = supabase
         .from("transactions")
-        .select("*, categories:category_id(name), profiles:user_id(full_name)")
+        .select("*, categories:category_id(name)")
         .eq("family_id", familyId!)
         .gte("occurred_at", from.toISOString().slice(0, 10))
         .order("occurred_at", { ascending: false })

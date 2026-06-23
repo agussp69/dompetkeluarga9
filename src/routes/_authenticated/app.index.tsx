@@ -35,7 +35,7 @@ function useDashboardData(familyId: string | null | undefined) {
         supabase.from("transactions").select("type, amount").eq("family_id", familyId!),
         supabase.from("transactions").select("type, amount, occurred_at, category_id").eq("family_id", familyId!).gte("occurred_at", sixMonthsAgo),
         supabase.from("savings_goals").select("id, name, target_amount, savings_contributions(amount)").eq("family_id", familyId!),
-        supabase.from("transactions").select("id, type, amount, description, occurred_at, category_id, user_id, categories:category_id(name), profiles:user_id(full_name)").eq("family_id", familyId!).order("created_at", { ascending: false }).limit(6),
+        supabase.from("transactions").select("id, type, amount, description, occurred_at, category_id, user_id, categories:category_id(name)").eq("family_id", familyId!).order("created_at", { ascending: false }).limit(6),
         supabase.from("categories").select("id, name, type").or(`is_global.eq.true,family_id.eq.${familyId}`),
       ]);
 

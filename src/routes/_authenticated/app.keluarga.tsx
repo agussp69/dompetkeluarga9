@@ -40,7 +40,7 @@ function FamilyPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("family_members")
-        .select("id, role, joined_at, user_id, profiles:user_id(full_name, email, avatar_url)")
+        .select("id, role, joined_at, user_id, profiles!inner(full_name, email, avatar_url)")
         .eq("family_id", familyId!);
       return data ?? [];
     },

@@ -58,7 +58,7 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
     queryFn: async () => {
       let q = supabase
         .from("transactions")
-        .select("*, categories:category_id(name), profiles:user_id(full_name)")
+        .select("*, categories:category_id(name)")
         .eq("family_id", familyId!)
         .eq("type", type)
         .order("occurred_at", { ascending: false })
@@ -69,7 +69,7 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
       const filtered = (data ?? []).filter((t: any) =>
         !search || (t.description ?? "").toLowerCase().includes(search.toLowerCase())
       );
-      return filtered as Txn[];
+      return filtered as unknown as Txn[];
     },
   });
 
