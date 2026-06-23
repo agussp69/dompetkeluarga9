@@ -151,7 +151,7 @@ function MockDashboard() {
     <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
       <div className="border-b border-border p-5">
         <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Saldo Keluarga</p>
-        <p className="mt-2 font-display text-3xl font-semibold">{formatIDR(12_450_000)}</p>
+        <p className="mt-2 font-display text-3xl font-semibold">{formatIDR(5_280_000)}</p>
       </div>
       <div className="grid grid-cols-2 gap-px bg-border">
         <div className="bg-card p-5">
