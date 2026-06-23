@@ -78,7 +78,7 @@ function BudgetPage() {
   const createBudget = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("budgets").insert({ family_id: familyId, year, month, created_by: u.user!.id });
+      const { error } = await supabase.from("budgets").insert({ family_id: familyId!, year, month, created_by: u.user!.id });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["budget"] }); toast.success("Budget dibuat"); },
