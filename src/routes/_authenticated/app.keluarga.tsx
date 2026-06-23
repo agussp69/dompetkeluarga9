@@ -38,11 +38,20 @@ function FamilyPage() {
     enabled: !!familyId,
     queryKey: ["members", familyId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: fm } = await supabase
         .from("family_members")
-        .select("id, role, joined_at, user_id, profiles!inner(full_name, email, avatar_url)")
+        .select("id, role, joined_at, user_id")
         .eq("family_id", familyId!);
-      return data ?? [];
+      const ids = (fm ?? []).map(m => m.user_id);
+      let profilesMap: Record<string, any> = {};
+      if (ids.length) {
+        const { data: ps } = await supabase
+          .from("profiles")
+          .select("id, full_name, email, avatar_url")
+          .in("id", ids);
+        (ps ?? []).forEach((p: any) => (profilesMap[p.id] = p));
+      }
+      return (fm ?? []).map((m: any) => ({ ...m, profiles: profilesMap[m.user_id] }));
     },
   });
 
