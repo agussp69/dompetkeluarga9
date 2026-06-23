@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-CXJd0Kh0.js";import{t}from"./transaction-page-CNKUspLe.js";var n=e(),r=()=>(0,n.jsx)(t,{type:`expense`});export{r as component};
