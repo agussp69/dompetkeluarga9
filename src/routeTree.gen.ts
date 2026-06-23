@@ -9,38 +9,255 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppTabunganRouteImport } from './routes/_authenticated/app.tabungan'
+import { Route as AuthenticatedAppRiwayatRouteImport } from './routes/_authenticated/app.riwayat'
+import { Route as AuthenticatedAppProfilRouteImport } from './routes/_authenticated/app.profil'
+import { Route as AuthenticatedAppPengeluaranRouteImport } from './routes/_authenticated/app.pengeluaran'
+import { Route as AuthenticatedAppPengaturanRouteImport } from './routes/_authenticated/app.pengaturan'
+import { Route as AuthenticatedAppPemasukanRouteImport } from './routes/_authenticated/app.pemasukan'
+import { Route as AuthenticatedAppNotifikasiRouteImport } from './routes/_authenticated/app.notifikasi'
+import { Route as AuthenticatedAppLaporanRouteImport } from './routes/_authenticated/app.laporan'
+import { Route as AuthenticatedAppKeluargaRouteImport } from './routes/_authenticated/app.keluarga'
+import { Route as AuthenticatedAppBudgetRouteImport } from './routes/_authenticated/app.budget'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppTabunganRoute =
+  AuthenticatedAppTabunganRouteImport.update({
+    id: '/app/tabungan',
+    path: '/app/tabungan',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppRiwayatRoute = AuthenticatedAppRiwayatRouteImport.update({
+  id: '/app/riwayat',
+  path: '/app/riwayat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppProfilRoute = AuthenticatedAppProfilRouteImport.update({
+  id: '/app/profil',
+  path: '/app/profil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppPengeluaranRoute =
+  AuthenticatedAppPengeluaranRouteImport.update({
+    id: '/app/pengeluaran',
+    path: '/app/pengeluaran',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppPengaturanRoute =
+  AuthenticatedAppPengaturanRouteImport.update({
+    id: '/app/pengaturan',
+    path: '/app/pengaturan',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppPemasukanRoute =
+  AuthenticatedAppPemasukanRouteImport.update({
+    id: '/app/pemasukan',
+    path: '/app/pemasukan',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppNotifikasiRoute =
+  AuthenticatedAppNotifikasiRouteImport.update({
+    id: '/app/notifikasi',
+    path: '/app/notifikasi',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppLaporanRoute = AuthenticatedAppLaporanRouteImport.update({
+  id: '/app/laporan',
+  path: '/app/laporan',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppKeluargaRoute =
+  AuthenticatedAppKeluargaRouteImport.update({
+    id: '/app/keluarga',
+    path: '/app/keluarga',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppBudgetRoute = AuthenticatedAppBudgetRouteImport.update({
+  id: '/app/budget',
+  path: '/app/budget',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/app/budget': typeof AuthenticatedAppBudgetRoute
+  '/app/keluarga': typeof AuthenticatedAppKeluargaRoute
+  '/app/laporan': typeof AuthenticatedAppLaporanRoute
+  '/app/notifikasi': typeof AuthenticatedAppNotifikasiRoute
+  '/app/pemasukan': typeof AuthenticatedAppPemasukanRoute
+  '/app/pengaturan': typeof AuthenticatedAppPengaturanRoute
+  '/app/pengeluaran': typeof AuthenticatedAppPengeluaranRoute
+  '/app/profil': typeof AuthenticatedAppProfilRoute
+  '/app/riwayat': typeof AuthenticatedAppRiwayatRoute
+  '/app/tabungan': typeof AuthenticatedAppTabunganRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/app/budget': typeof AuthenticatedAppBudgetRoute
+  '/app/keluarga': typeof AuthenticatedAppKeluargaRoute
+  '/app/laporan': typeof AuthenticatedAppLaporanRoute
+  '/app/notifikasi': typeof AuthenticatedAppNotifikasiRoute
+  '/app/pemasukan': typeof AuthenticatedAppPemasukanRoute
+  '/app/pengaturan': typeof AuthenticatedAppPengaturanRoute
+  '/app/pengeluaran': typeof AuthenticatedAppPengeluaranRoute
+  '/app/profil': typeof AuthenticatedAppProfilRoute
+  '/app/riwayat': typeof AuthenticatedAppRiwayatRoute
+  '/app/tabungan': typeof AuthenticatedAppTabunganRoute
+  '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/app/budget': typeof AuthenticatedAppBudgetRoute
+  '/_authenticated/app/keluarga': typeof AuthenticatedAppKeluargaRoute
+  '/_authenticated/app/laporan': typeof AuthenticatedAppLaporanRoute
+  '/_authenticated/app/notifikasi': typeof AuthenticatedAppNotifikasiRoute
+  '/_authenticated/app/pemasukan': typeof AuthenticatedAppPemasukanRoute
+  '/_authenticated/app/pengaturan': typeof AuthenticatedAppPengaturanRoute
+  '/_authenticated/app/pengeluaran': typeof AuthenticatedAppPengeluaranRoute
+  '/_authenticated/app/profil': typeof AuthenticatedAppProfilRoute
+  '/_authenticated/app/riwayat': typeof AuthenticatedAppRiwayatRoute
+  '/_authenticated/app/tabungan': typeof AuthenticatedAppTabunganRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/app/budget'
+    | '/app/keluarga'
+    | '/app/laporan'
+    | '/app/notifikasi'
+    | '/app/pemasukan'
+    | '/app/pengaturan'
+    | '/app/pengeluaran'
+    | '/app/profil'
+    | '/app/riwayat'
+    | '/app/tabungan'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/app/budget'
+    | '/app/keluarga'
+    | '/app/laporan'
+    | '/app/notifikasi'
+    | '/app/pemasukan'
+    | '/app/pengaturan'
+    | '/app/pengeluaran'
+    | '/app/profil'
+    | '/app/riwayat'
+    | '/app/tabungan'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/_authenticated/app/budget'
+    | '/_authenticated/app/keluarga'
+    | '/_authenticated/app/laporan'
+    | '/_authenticated/app/notifikasi'
+    | '/_authenticated/app/pemasukan'
+    | '/_authenticated/app/pengaturan'
+    | '/_authenticated/app/pengeluaran'
+    | '/_authenticated/app/profil'
+    | '/_authenticated/app/riwayat'
+    | '/_authenticated/app/tabungan'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +265,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/tabungan': {
+      id: '/_authenticated/app/tabungan'
+      path: '/app/tabungan'
+      fullPath: '/app/tabungan'
+      preLoaderRoute: typeof AuthenticatedAppTabunganRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/riwayat': {
+      id: '/_authenticated/app/riwayat'
+      path: '/app/riwayat'
+      fullPath: '/app/riwayat'
+      preLoaderRoute: typeof AuthenticatedAppRiwayatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/profil': {
+      id: '/_authenticated/app/profil'
+      path: '/app/profil'
+      fullPath: '/app/profil'
+      preLoaderRoute: typeof AuthenticatedAppProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/pengeluaran': {
+      id: '/_authenticated/app/pengeluaran'
+      path: '/app/pengeluaran'
+      fullPath: '/app/pengeluaran'
+      preLoaderRoute: typeof AuthenticatedAppPengeluaranRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/pengaturan': {
+      id: '/_authenticated/app/pengaturan'
+      path: '/app/pengaturan'
+      fullPath: '/app/pengaturan'
+      preLoaderRoute: typeof AuthenticatedAppPengaturanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/pemasukan': {
+      id: '/_authenticated/app/pemasukan'
+      path: '/app/pemasukan'
+      fullPath: '/app/pemasukan'
+      preLoaderRoute: typeof AuthenticatedAppPemasukanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/notifikasi': {
+      id: '/_authenticated/app/notifikasi'
+      path: '/app/notifikasi'
+      fullPath: '/app/notifikasi'
+      preLoaderRoute: typeof AuthenticatedAppNotifikasiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/laporan': {
+      id: '/_authenticated/app/laporan'
+      path: '/app/laporan'
+      fullPath: '/app/laporan'
+      preLoaderRoute: typeof AuthenticatedAppLaporanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/keluarga': {
+      id: '/_authenticated/app/keluarga'
+      path: '/app/keluarga'
+      fullPath: '/app/keluarga'
+      preLoaderRoute: typeof AuthenticatedAppKeluargaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/budget': {
+      id: '/_authenticated/app/budget'
+      path: '/app/budget'
+      fullPath: '/app/budget'
+      preLoaderRoute: typeof AuthenticatedAppBudgetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppBudgetRoute: typeof AuthenticatedAppBudgetRoute
+  AuthenticatedAppKeluargaRoute: typeof AuthenticatedAppKeluargaRoute
+  AuthenticatedAppLaporanRoute: typeof AuthenticatedAppLaporanRoute
+  AuthenticatedAppNotifikasiRoute: typeof AuthenticatedAppNotifikasiRoute
+  AuthenticatedAppPemasukanRoute: typeof AuthenticatedAppPemasukanRoute
+  AuthenticatedAppPengaturanRoute: typeof AuthenticatedAppPengaturanRoute
+  AuthenticatedAppPengeluaranRoute: typeof AuthenticatedAppPengeluaranRoute
+  AuthenticatedAppProfilRoute: typeof AuthenticatedAppProfilRoute
+  AuthenticatedAppRiwayatRoute: typeof AuthenticatedAppRiwayatRoute
+  AuthenticatedAppTabunganRoute: typeof AuthenticatedAppTabunganRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppBudgetRoute: AuthenticatedAppBudgetRoute,
+  AuthenticatedAppKeluargaRoute: AuthenticatedAppKeluargaRoute,
+  AuthenticatedAppLaporanRoute: AuthenticatedAppLaporanRoute,
+  AuthenticatedAppNotifikasiRoute: AuthenticatedAppNotifikasiRoute,
+  AuthenticatedAppPemasukanRoute: AuthenticatedAppPemasukanRoute,
+  AuthenticatedAppPengaturanRoute: AuthenticatedAppPengaturanRoute,
+  AuthenticatedAppPengeluaranRoute: AuthenticatedAppPengeluaranRoute,
+  AuthenticatedAppProfilRoute: AuthenticatedAppProfilRoute,
+  AuthenticatedAppRiwayatRoute: AuthenticatedAppRiwayatRoute,
+  AuthenticatedAppTabunganRoute: AuthenticatedAppTabunganRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
