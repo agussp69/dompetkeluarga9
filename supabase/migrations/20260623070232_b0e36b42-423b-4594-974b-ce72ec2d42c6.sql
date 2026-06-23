@@ -1,4 +1,6 @@
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- ============ ENUMS ============
 CREATE TYPE public.app_role AS ENUM ('admin', 'owner', 'anggota');
 CREATE TYPE public.txn_type AS ENUM ('income', 'expense');
@@ -239,7 +241,7 @@ CREATE TABLE public.invitations (
   family_id UUID NOT NULL REFERENCES public.families ON DELETE CASCADE,
   email TEXT NOT NULL,
   role public.app_role NOT NULL DEFAULT 'anggota',
-  token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16),'hex'),
+  token TEXT NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(16),'hex'),
   status public.invitation_status NOT NULL DEFAULT 'pending',
   invited_by UUID REFERENCES auth.users ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

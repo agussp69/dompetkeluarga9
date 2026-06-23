@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,9 +37,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  useEffect(() => {}, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -82,8 +79,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Dompet Keluarga — Kelola Keuangan Keluarga Bersama" },
       { name: "twitter:description", content: "Aplikasi pencatatan dan pengelolaan keuangan keluarga: pemasukan, pengeluaran, anggaran bulanan, dan tabungan impian." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3acb62f1-bbe3-4221-9e7c-53053036d557/id-preview-2dd13c55--2d84ae38-5dc3-4df3-bd00-a281be07b2e1.lovable.app-1782199873429.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3acb62f1-bbe3-4221-9e7c-53053036d557/id-preview-2dd13c55--2d84ae38-5dc3-4df3-bd00-a281be07b2e1.lovable.app-1782199873429.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

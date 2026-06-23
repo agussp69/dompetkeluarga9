@@ -4,7 +4,6 @@ import { Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,16 +83,16 @@ function GoogleButton() {
   const [loading, setLoading] = useState(false);
   const handle = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/app",
+      },
     });
-    if (result.error) {
-      toast.error("Gagal masuk dengan Google");
+    if (error) {
+      toast.error("Gagal masuk dengan Google: " + error.message);
       setLoading(false);
-      return;
     }
-    if (result.redirected) return;
-    window.location.href = "/app";
   };
   return (
     <Button type="button" variant="outline" className="w-full" onClick={handle} disabled={loading}>
