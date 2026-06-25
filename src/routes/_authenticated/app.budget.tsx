@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app/shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
-import { formatIDR, monthNameId } from "@/lib/format";
+import { formatIDR, monthNameId, parseThousand } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/budget")({
   head: () => ({ meta: [{ title: "Budget Bulanan · Dompet Keluarga" }] }),
@@ -204,7 +205,7 @@ function ItemDialog({ budgetId, categories, editing, onDone }: { budgetId: strin
 
   const save = useMutation({
     mutationFn: async () => {
-      const num = Number(amount.replace(/[^\d.-]/g, ""));
+      const num = parseThousand(amount);
       if (!num || num <= 0) throw new Error("Target harus > 0");
       const payload = { budget_id: budgetId, label, amount: num, category_id: categoryId || null };
       if (editing) {
@@ -224,7 +225,7 @@ function ItemDialog({ budgetId, categories, editing, onDone }: { budgetId: strin
       <DialogHeader><DialogTitle>{editing ? "Edit Pos" : "Tambah Pos Anggaran"}</DialogTitle></DialogHeader>
       <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
         <div className="space-y-2"><Label>Nama Pos</Label><Input value={label} onChange={e => setLabel(e.target.value)} placeholder="cth. Belanja Bulanan" required /></div>
-        <div className="space-y-2"><Label>Target (Rp)</Label><Input inputMode="numeric" value={amount} onChange={e => setAmount(e.target.value)} required /></div>
+        <div className="space-y-2"><Label>Target (Rp)</Label><NumericInput value={amount} onChange={setAmount} required /></div>
         <div className="space-y-2">
           <Label>Kategori</Label>
           <Select value={categoryId} onValueChange={setCategoryId}>

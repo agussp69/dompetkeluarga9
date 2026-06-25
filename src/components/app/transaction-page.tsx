@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app/shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
-import { formatIDR, formatDate, todayISO } from "@/lib/format";
+import { formatIDR, formatDate, todayISO, parseThousand } from "@/lib/format";
 
 type Txn = {
   id: string; family_id: string; user_id: string; type: "income" | "expense";
@@ -222,7 +223,7 @@ function TxnDialog({
 
   const save = useMutation({
     mutationFn: async () => {
-      const num = Number(amount.replace(/[^\d.-]/g, ""));
+      const num = parseThousand(amount);
       if (!num || num <= 0) throw new Error("Nominal harus lebih dari 0");
       const { data: u } = await supabase.auth.getUser();
       const payload: any = {
@@ -260,7 +261,7 @@ function TxnDialog({
       <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
         <div className="space-y-2">
           <Label>Nominal (Rp)</Label>
-          <Input inputMode="numeric" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} required />
+          <NumericInput placeholder="0" value={amount} onChange={setAmount} required />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">

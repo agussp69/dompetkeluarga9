@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app/shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/numeric-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
-import { formatIDR, formatDate, todayISO } from "@/lib/format";
+import { formatIDR, formatDate, todayISO, parseThousand } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/tabungan")({
   head: () => ({ meta: [{ title: "Tabungan Impian · Dompet Keluarga" }] }),
@@ -134,7 +135,7 @@ function GoalDialog({ familyId, editing, onDone }: { familyId: string; editing: 
 
   const save = useMutation({
     mutationFn: async () => {
-      const num = Number(target.replace(/[^\d.-]/g, ""));
+      const num = parseThousand(target);
       if (!num || num <= 0) throw new Error("Target harus > 0");
       const { data: u } = await supabase.auth.getUser();
       const payload: any = {
@@ -160,7 +161,7 @@ function GoalDialog({ familyId, editing, onDone }: { familyId: string; editing: 
       <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
         <div className="space-y-2"><Label>Nama Target</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="cth. Dana Liburan" required /></div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2"><Label>Nominal Target (Rp)</Label><Input inputMode="numeric" value={target} onChange={e => setTarget(e.target.value)} required /></div>
+          <div className="space-y-2"><Label>Nominal Target (Rp)</Label><NumericInput value={target} onChange={setTarget} required /></div>
           <div className="space-y-2"><Label>Deadline</Label><Input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} /></div>
         </div>
         <div className="space-y-2">
@@ -189,7 +190,7 @@ function ContribDialog({ goal, onDone }: { goal: any; onDone: () => void }) {
 
   const save = useMutation({
     mutationFn: async () => {
-      const num = Number(amount.replace(/[^\d.-]/g, ""));
+      const num = parseThousand(amount);
       if (!num || num <= 0) throw new Error("Nominal harus > 0");
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase.from("savings_contributions").insert({
@@ -205,7 +206,7 @@ function ContribDialog({ goal, onDone }: { goal: any; onDone: () => void }) {
     <DialogContent>
       <DialogHeader><DialogTitle>Tambah Kontribusi: {goal.name}</DialogTitle></DialogHeader>
       <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
-        <div className="space-y-2"><Label>Nominal (Rp)</Label><Input inputMode="numeric" value={amount} onChange={e => setAmount(e.target.value)} required /></div>
+        <div className="space-y-2"><Label>Nominal (Rp)</Label><NumericInput value={amount} onChange={setAmount} required /></div>
         <div className="space-y-2"><Label>Tanggal</Label><Input type="date" value={date} onChange={e => setDate(e.target.value)} required /></div>
         <div className="space-y-2"><Label>Catatan</Label><Textarea rows={2} value={note} onChange={e => setNote(e.target.value)} /></div>
         <DialogFooter><Button type="button" variant="ghost" onClick={onDone}>Batal</Button><Button type="submit" disabled={save.isPending}>Simpan</Button></DialogFooter>

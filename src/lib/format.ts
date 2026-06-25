@@ -25,3 +25,17 @@ export const monthNameId = (m: number) =>
   ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"][m - 1] ?? "";
 
 export const todayISO = () => new Date().toISOString().slice(0, 10);
+
+export const formatThousand = (val: string | number | null | undefined): string => {
+  if (val === null || val === undefined) return "";
+  const clean = String(val).replace(/\D/g, "");
+  if (!clean) return "";
+  return new Intl.NumberFormat("id-ID").format(Number(clean));
+};
+
+export const parseThousand = (val: string | number | null | undefined): number => {
+  if (val === null || val === undefined) return 0;
+  const clean = String(val).replace(/\D/g, "");
+  return clean ? Number(clean) : 0;
+};
+
