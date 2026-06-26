@@ -32,7 +32,7 @@ export default defineConfig(({ command, mode }) => {
     plugins.push(
       nitro({
         preset: "vercel",
-        traceDeps: ["tslib*"],
+        noExternals: [/^@radix-ui\//, /^@supabase\//],
       })
     );
   }
@@ -41,12 +41,13 @@ export default defineConfig(({ command, mode }) => {
     define: envDefine,
     plugins,
     ssr: {
-      noExternal: [/^@radix-ui\//, /^@supabase\//, "tslib"],
+      noExternal: [/^@radix-ui\//, /^@supabase\//],
     },
     resolve: {
       tsconfigPaths: true,
       alias: {
         "@": `${process.cwd()}/src`,
+        "tslib": `${process.cwd()}/node_modules/tslib/tslib.es6.mjs`,
       },
       dedupe: [
         "react",
