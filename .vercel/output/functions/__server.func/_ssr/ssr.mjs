@@ -1652,7 +1652,7 @@ async function normalizeCatastrophicSsrResponse(response) {
 	if (response.status < 500) return response;
 	if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 	const body = await response.clone().text();
-	if (!body.includes("\"unhandled\":true") || !body.includes("\"message\":\"HTTPError\"")) return response;
+	if (!body.includes("\"unhandled\":true") && !body.includes("\"error\":true")) return response;
 	console.error(consumeLastCapturedError() ?? /* @__PURE__ */ new Error(`h3 swallowed SSR error: ${body}`));
 	return new Response(renderErrorPage(), {
 		status: 500,

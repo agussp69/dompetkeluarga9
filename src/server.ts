@@ -18,7 +18,7 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   if (!contentType.includes("application/json")) return response;
 
   const body = await response.clone().text();
-  if (!body.includes('"unhandled":true') || !body.includes('"message":"HTTPError"')) {
+  if (!body.includes('"unhandled":true') && !body.includes('"error":true')) {
     return response;
   }
 

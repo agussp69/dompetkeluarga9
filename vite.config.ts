@@ -32,6 +32,7 @@ export default defineConfig(({ command, mode }) => {
     plugins.push(
       nitro({
         preset: "vercel",
+        traceDeps: ["tslib*"],
       })
     );
   }
