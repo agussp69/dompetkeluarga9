@@ -40,6 +40,9 @@ export default defineConfig(({ command, mode }) => {
   return {
     define: envDefine,
     plugins,
+    ssr: {
+      noExternal: [/^@radix-ui\//, /^@supabase\//, "tslib"],
+    },
     resolve: {
       tsconfigPaths: true,
       alias: {
