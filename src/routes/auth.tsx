@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      throw redirect({ to: "/app" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Masuk · Dompet Keluarga" },
