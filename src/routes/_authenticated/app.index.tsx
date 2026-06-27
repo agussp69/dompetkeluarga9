@@ -106,7 +106,7 @@ function Dashboard() {
   const insights = useMemo(() => {
     if (!data) return [] as string[];
     const out: string[] = [];
-    if (data.savingRate > 20) out.push(`Hebat! Rasio tabungan bulan ini ${data.savingRate.toFixed(0)}%.`);
+    if (data.savingRate > 20) out.push(`Hebat! Rasio Dompet Keluarga bulan ini ${data.savingRate.toFixed(0)}%.`);
     if (data.monthExpense > data.monthIncome) out.push("Pengeluaran bulan ini melebihi pemasukan — saatnya tinjau anggaran.");
     if (data.pie[0]) out.push(`Pengeluaran terbesar bulan ini: ${data.pie[0].name} (${formatIDR(data.pie[0].value)}).`);
     if (data.balance > 0 && out.length < 3) out.push(`Saldo keluarga positif: ${formatIDR(data.balance)}.`);
@@ -134,7 +134,7 @@ function Dashboard() {
         <KPI icon={Wallet} label="Saldo Keluarga" value={formatIDR(data?.balance ?? 0)} tone="primary" loading={isLoading} />
         <KPI icon={ArrowDownCircle} label="Pemasukan Bulan Ini" value={formatIDR(data?.monthIncome ?? 0)} tone="success" loading={isLoading} />
         <KPI icon={ArrowUpCircle} label="Pengeluaran Bulan Ini" value={formatIDR(data?.monthExpense ?? 0)} tone="destructive" loading={isLoading} />
-        <KPI icon={TrendingUp} label="Rasio Tabungan" value={`${(data?.savingRate ?? 0).toFixed(0)}%`} tone="default" loading={isLoading} />
+        <KPI icon={TrendingUp} label="Rasio Dompet Keluarga" value={`${(data?.savingRate ?? 0).toFixed(0)}%`} tone="default" loading={isLoading} />
       </div>
 
       {/* Charts row */}

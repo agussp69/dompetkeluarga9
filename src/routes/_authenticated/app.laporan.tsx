@@ -108,7 +108,7 @@ function ReportsPage() {
         <Stat label="Total Pemasukan" value={formatIDR(data?.income ?? 0)} tone="success" />
         <Stat label="Total Pengeluaran" value={formatIDR(data?.expense ?? 0)} tone="destructive" />
         <Stat label="Saldo" value={formatIDR(data?.balance ?? 0)} />
-        <Stat label="Rasio Tabungan" value={`${(data?.savingRate ?? 0).toFixed(0)}%`} />
+        <Stat label="Rasio Dompet Keluarga" value={`${(data?.savingRate ?? 0).toFixed(0)}%`} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">

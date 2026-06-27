@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Target, Plane, Home, Car, GraduationCap, Heart, Shield } from "lucide-react";
+import { Plus, Minus, Pencil, Trash2, Target, Plane, Home, Car, GraduationCap, Heart, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/app/shell";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ function SavingsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [contribFor, setContribFor] = useState<any>(null);
+  const [withdrawFor, setWithdrawFor] = useState<any>(null);
 
   const { data: goals = [] } = useQuery({
     enabled: !!familyId,
@@ -110,12 +111,25 @@ function SavingsPage() {
                   {g.note ? <p className="mt-2 text-xs text-muted-foreground">{g.note}</p> : null}
                 </div>
 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="mt-4 w-full" onClick={() => setContribFor(g)}><Plus className="mr-1 h-4 w-4" />Tambah Kontribusi</Button>
-                  </DialogTrigger>
-                  {contribFor?.id === g.id ? <ContribDialog goal={g} onDone={() => setContribFor(null)} /> : null}
-                </Dialog>
+                <div className="mt-4 flex gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex-1 text-xs sm:text-sm" onClick={() => setContribFor(g)}>
+                        <Plus className="mr-1 h-4 w-4" />Kontribusi
+                      </Button>
+                    </DialogTrigger>
+                    {contribFor?.id === g.id ? <ContribDialog goal={g} onDone={() => setContribFor(null)} /> : null}
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex-1 text-xs sm:text-sm text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setWithdrawFor(g)}>
+                        <Minus className="mr-1 h-4 w-4" />Tarik Dana
+                      </Button>
+                    </DialogTrigger>
+                    {withdrawFor?.id === g.id ? <WithdrawDialog goal={g} onDone={() => setWithdrawFor(null)} /> : null}
+                  </Dialog>
+                </div>
               </div>
             );
           })}
@@ -193,12 +207,68 @@ function ContribDialog({ goal, onDone }: { goal: any; onDone: () => void }) {
       const num = parseThousand(amount);
       if (!num || num <= 0) throw new Error("Nominal harus > 0");
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("savings_contributions").insert({
-        goal_id: goal.id, user_id: u.user!.id, amount: num, contributed_at: date, note: note || null,
+      const userId = u.user!.id;
+      const familyId = goal.family_id;
+
+      if (!familyId) throw new Error("ID Keluarga tidak ditemukan");
+
+      // 1. Cari kategori "Tabungan" tipe pengeluaran (expense)
+      const { data: catData } = await supabase
+        .from("categories")
+        .select("id")
+        .or(`is_global.eq.true,family_id.eq.${familyId}`)
+        .eq("type", "expense")
+        .eq("name", "Tabungan")
+        .maybeSingle();
+
+      let categoryId = catData?.id;
+
+      // 2. Jika kategori tidak ditemukan, buat kategori baru khusus untuk keluarga ini
+      if (!categoryId) {
+        const { data: newCat, error: newCatError } = await supabase
+          .from("categories")
+          .insert({
+            name: "Tabungan",
+            type: "expense",
+            family_id: familyId,
+            is_global: false,
+          })
+          .select("id")
+          .single();
+        if (newCatError) throw newCatError;
+        categoryId = newCat.id;
+      }
+
+      // 3. Simpan kontribusi tabungan
+      const { error: contribError } = await supabase.from("savings_contributions").insert({
+        goal_id: goal.id,
+        user_id: userId,
+        amount: num,
+        contributed_at: date,
+        note: note || null,
       });
-      if (error) throw error;
+      if (contribError) throw contribError;
+
+      // 4. Catat sebagai transaksi pengeluaran dengan kategori "Tabungan"
+      const { error: txnError } = await supabase.from("transactions").insert({
+        family_id: familyId,
+        user_id: userId,
+        type: "expense",
+        amount: num,
+        occurred_at: date,
+        category_id: categoryId,
+        description: `Kontribusi Tabungan: ${goal.name}`,
+        note: note || null,
+      });
+      if (txnError) throw txnError;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["goals"] }); toast.success("Kontribusi ditambahkan"); onDone(); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["txns"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Kontribusi ditambahkan");
+      onDone();
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -210,6 +280,101 @@ function ContribDialog({ goal, onDone }: { goal: any; onDone: () => void }) {
         <div className="space-y-2"><Label>Tanggal</Label><Input type="date" value={date} onChange={e => setDate(e.target.value)} required /></div>
         <div className="space-y-2"><Label>Catatan</Label><Textarea rows={2} value={note} onChange={e => setNote(e.target.value)} /></div>
         <DialogFooter><Button type="button" variant="ghost" onClick={onDone}>Batal</Button><Button type="submit" disabled={save.isPending}>Simpan</Button></DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+function WithdrawDialog({ goal, onDone }: { goal: any; onDone: () => void }) {
+  const qc = useQueryClient();
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(todayISO());
+  const [note, setNote] = useState("");
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const num = parseThousand(amount);
+      if (!num || num <= 0) throw new Error("Nominal harus > 0");
+      const { data: u } = await supabase.auth.getUser();
+      const userId = u.user!.id;
+      const familyId = goal.family_id;
+
+      if (!familyId) throw new Error("ID Keluarga tidak ditemukan");
+
+      // Hitung saldo tabungan saat ini
+      const saved = (goal.savings_contributions ?? []).reduce((s: number, c: any) => s + Number(c.amount), 0);
+      if (num > saved) {
+        throw new Error(`Nominal penarikan melebihi saldo tabungan saat ini (${formatIDR(saved)})`);
+      }
+
+      // 1. Cari kategori "Tabungan" tipe pemasukan (income)
+      const { data: catData } = await supabase
+        .from("categories")
+        .select("id")
+        .or(`is_global.eq.true,family_id.eq.${familyId}`)
+        .eq("type", "income")
+        .eq("name", "Tabungan")
+        .maybeSingle();
+
+      let categoryId = catData?.id;
+
+      // 2. Jika kategori tidak ditemukan, buat kategori baru khusus untuk keluarga ini
+      if (!categoryId) {
+        const { data: newCat, error: newCatError } = await supabase
+          .from("categories")
+          .insert({
+            name: "Tabungan",
+            type: "income",
+            family_id: familyId,
+            is_global: false,
+          })
+          .select("id")
+          .single();
+        if (newCatError) throw newCatError;
+        categoryId = newCat.id;
+      }
+
+      // 3. Simpan penarikan tabungan (nominal negatif)
+      const { error: contribError } = await supabase.from("savings_contributions").insert({
+        goal_id: goal.id,
+        user_id: userId,
+        amount: -num,
+        contributed_at: date,
+        note: note || null,
+      });
+      if (contribError) throw contribError;
+
+      // 4. Catat sebagai transaksi pemasukan dengan kategori "Tabungan"
+      const { error: txnError } = await supabase.from("transactions").insert({
+        family_id: familyId,
+        user_id: userId,
+        type: "income",
+        amount: num,
+        occurred_at: date,
+        category_id: categoryId,
+        description: `Tarik Dana Tabungan: ${goal.name}`,
+        note: note || null,
+      });
+      if (txnError) throw txnError;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["txns"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Dana berhasil ditarik");
+      onDone();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <DialogContent>
+      <DialogHeader><DialogTitle>Tarik Dana Tabungan: {goal.name}</DialogTitle></DialogHeader>
+      <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
+        <div className="space-y-2"><Label>Nominal Penarikan (Rp)</Label><NumericInput value={amount} onChange={setAmount} required /></div>
+        <div className="space-y-2"><Label>Tanggal Penarikan</Label><Input type="date" value={date} onChange={e => setDate(e.target.value)} required /></div>
+        <div className="space-y-2"><Label>Catatan</Label><Textarea rows={2} value={note} onChange={e => setNote(e.target.value)} /></div>
+        <DialogFooter><Button type="button" variant="ghost" onClick={onDone}>Batal</Button><Button type="submit" disabled={save.isPending}>Tarik Dana</Button></DialogFooter>
       </form>
     </DialogContent>
   );

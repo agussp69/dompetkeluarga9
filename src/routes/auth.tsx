@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -39,6 +39,24 @@ const registerSchema = z.object({
 });
 
 function AuthPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        navigate({ to: "/app", replace: true });
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        navigate({ to: "/app", replace: true });
+      }
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand side */}
