@@ -49,7 +49,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile topbar */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background px-4 lg:hidden">
         <div className="flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-primary" />
+          <div className="grid h-7 w-7 place-items-center rounded-md bg-white border border-border p-1">
+            <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-full w-full object-contain" />
+          </div>
           <span className="font-display text-base font-semibold">Dompet Keluarga</span>
         </div>
         <button onClick={() => setMobileOpen(v => !v)} className="rounded-md border border-border p-2">
@@ -67,8 +69,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <div className="flex h-full flex-col">
             <div className="hidden h-16 items-center gap-2 border-b border-sidebar-border px-5 lg:flex">
-              <div className="grid h-8 w-8 place-items-center rounded-md bg-primary">
-                <Wallet className="h-4 w-4 text-primary-foreground" />
+              <div className="grid h-8 w-8 place-items-center rounded-md bg-white border border-sidebar-border p-1">
+                <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-full w-full object-contain" />
               </div>
               <div>
                 <div className="font-display text-sm font-semibold leading-none">Dompet Keluarga</div>

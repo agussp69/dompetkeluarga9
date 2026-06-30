@@ -23,9 +23,7 @@ function Landing() {
       <header className="border-b border-border">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary">
-              <Wallet className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-8 w-auto object-contain" />
             <span className="font-display text-lg font-semibold">Dompet Keluarga</span>
           </div>
           <div className="flex items-center gap-2">
@@ -136,7 +134,7 @@ function Landing() {
       <footer className="bg-background">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-8 sm:flex-row">
           <div className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-primary" />
+            <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-5 w-auto object-contain" />
             <span className="font-display text-sm font-medium">Dompet Keluarga</span>
           </div>
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Dompet Keluarga · Untuk keluarga Indonesia.</p>

@@ -62,7 +62,9 @@ function AuthPage() {
       {/* Brand side */}
       <div className="hidden border-r border-border bg-primary p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <Wallet className="h-5 w-5" />
+          <div className="bg-white p-1 rounded-md">
+            <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-6 w-auto object-contain" />
+          </div>
           <span className="font-display text-lg font-semibold">Dompet Keluarga</span>
         </Link>
         <div>
@@ -80,7 +82,7 @@ function AuthPage() {
       <div className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md">
           <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <Wallet className="h-5 w-5 text-primary" />
+            <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-8 w-auto object-contain" />
             <span className="font-display text-lg font-semibold">Dompet Keluarga</span>
           </Link>
           <AuthCard />
