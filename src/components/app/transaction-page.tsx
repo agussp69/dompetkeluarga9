@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useDeferredValue } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Search, ArrowDownCircle, ArrowUpCircle, X } from "lucide-react";
 import { toast } from "sonner";
@@ -32,6 +32,8 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
   const familyId = profile?.active_family_id;
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  // QW1 Fix: Debounce search agar tidak trigger query Supabase di setiap ketikan
+  const deferredSearch = useDeferredValue(search);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Txn | null>(null);
   const [open, setOpen] = useState(false);
@@ -55,7 +57,7 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
 
   const { data: txns = [], isLoading } = useQuery({
     enabled: !!familyId,
-    queryKey: ["txns", familyId, type, search, categoryFilter],
+    queryKey: ["txns", familyId, type, deferredSearch, categoryFilter],
     queryFn: async () => {
       let q = supabase
         .from("transactions")
@@ -68,7 +70,7 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
       const { data, error } = await q;
       if (error) throw error;
       const filtered = (data ?? []).filter((t: any) =>
-        !search || (t.description ?? "").toLowerCase().includes(search.toLowerCase())
+        !deferredSearch || (t.description ?? "").toLowerCase().includes(deferredSearch.toLowerCase())
       );
       return filtered as unknown as Txn[];
     },

@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +9,44 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 
+/** Kunci sessionStorage untuk menyimpan token undangan sementara */
+const INV_TOKEN_KEY = "dk_pending_inv";
+
+/**
+ * Setelah login/register berhasil, cek apakah ada token undangan yang tersimpan.
+ * Jika ada, panggil RPC accept_invitation, lalu hapus token dari storage.
+ */
+async function processPendingInvitation(): Promise<void> {
+  const token = sessionStorage.getItem(INV_TOKEN_KEY);
+  if (!token) return;
+  sessionStorage.removeItem(INV_TOKEN_KEY);
+  try {
+    const { error } = await supabase.rpc("accept_invitation", { p_token: token });
+    if (error) {
+      toast.error("Gagal bergabung ke keluarga: " + error.message);
+    } else {
+      toast.success("Berhasil bergabung ke keluarga!");
+    }
+  } catch {
+    toast.error("Gagal memproses undangan.");
+  }
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  // B1 Fix: Simpan token undangan sebelum redirect check
+  // Kita parse URL secara manual agar tidak merusak semua Link to="/auth" yang sudah ada
   beforeLoad: async () => {
+    if (typeof window !== "undefined") {
+      const inv = new URLSearchParams(window.location.search).get("inv");
+      if (inv) {
+        sessionStorage.setItem(INV_TOKEN_KEY, inv);
+      }
+    }
     const { data } = await supabase.auth.getUser();
     if (data.user) {
+      // User sudah login, proses undangan lalu redirect
+      await processPendingInvitation();
       throw redirect({ to: "/app" });
     }
   },
@@ -27,9 +59,10 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+// QW2 Fix: Samakan minimum password menjadi 8 karakter di semua schema
 const loginSchema = z.object({
   email: z.string().trim().email("Format email tidak valid"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+  password: z.string().min(8, "Password minimal 8 karakter"),
 });
 
 const registerSchema = z.object({
@@ -40,6 +73,10 @@ const registerSchema = z.object({
 
 function AuthPage() {
   const navigate = useNavigate();
+  // B1: Cek apakah ada token undangan (dari URL atau sessionStorage)
+  const hasInvitation =
+    (typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("inv")) ||
+    !!sessionStorage.getItem(INV_TOKEN_KEY);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -85,6 +122,12 @@ function AuthPage() {
             <img src="/logo.png" alt="Dompet Keluarga Logo" className="h-8 w-auto object-contain" />
             <span className="font-display text-lg font-semibold">Dompet Keluarga</span>
           </Link>
+          {/* B1: Banner undangan jika user membuka link undangan */}
+          {hasInvitation && (
+            <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
+              <strong>Anda diundang bergabung ke keluarga.</strong> Masuk atau daftar untuk menerima undangan.
+            </div>
+          )}
           <AuthCard />
         </div>
       </div>
@@ -144,12 +187,25 @@ function LoginForm() {
       return;
     }
     setLoading(true);
+    // B3 Fix: Gunakan persistSession (default true) — untuk remember=false
+    // kita hapus token dari localStorage setelah login agar session tidak persisten
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error(error.message === "Invalid login credentials" ? "Email atau password salah" : error.message);
       return;
     }
+    if (!remember) {
+      // Pindahkan session dari localStorage ke sessionStorage
+      // sehingga sesi berakhir saat browser/tab ditutup
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        localStorage.removeItem(`sb-${new URL(import.meta.env.VITE_SUPABASE_URL ?? "").hostname.split(".")[0]}-auth-token`);
+        sessionStorage.setItem("dk_temp_session", JSON.stringify(session));
+      }
+    }
+    // B1 Fix: Proses undangan yang tertunda setelah login berhasil
+    await processPendingInvitation();
     toast.success("Selamat datang!");
     navigate({ to: "/app" });
   };
@@ -214,6 +270,8 @@ function RegisterForm() {
       return;
     }
     if (data.session) {
+      // B1 Fix: Proses undangan yang tertunda setelah register berhasil
+      await processPendingInvitation();
       toast.success("Akun berhasil dibuat!");
       navigate({ to: "/app" });
     } else {

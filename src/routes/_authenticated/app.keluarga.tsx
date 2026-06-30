@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,7 +119,23 @@ function FamilyPage() {
                 </Badge>
                 <span className="hidden text-xs text-muted-foreground sm:inline">{formatDate(m.joined_at)}</span>
                 {isOwner && m.role !== "owner" ? (
-                  <Button variant="ghost" size="icon" onClick={() => removeMember.mutate(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Keluarkan anggota?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <strong>{m.profiles?.full_name ?? "Anggota ini"}</strong> akan dikeluarkan dari keluarga dan tidak bisa mengakses data keuangan bersama. Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => removeMember.mutate(m.id)}>Ya, Keluarkan</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 ) : null}
               </li>
             ))}

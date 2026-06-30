@@ -31,8 +31,10 @@ function useDashboardData(familyId: string | null | undefined) {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().slice(0, 10);
 
+      const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), 1).toISOString().slice(0, 10);
+
       const [allTxn, monthTxn, goals, recent, categories] = await Promise.all([
-        supabase.from("transactions").select("type, amount").eq("family_id", familyId!),
+        supabase.from("transactions").select("type, amount").eq("family_id", familyId!).gte("occurred_at", twoYearsAgo).limit(10000),
         supabase.from("transactions").select("type, amount, occurred_at, category_id").eq("family_id", familyId!).gte("occurred_at", sixMonthsAgo),
         supabase.from("savings_goals").select("id, name, target_amount, savings_contributions(amount)").eq("family_id", familyId!),
         supabase.from("transactions").select("id, type, amount, description, occurred_at, category_id, user_id, categories:category_id(name)").eq("family_id", familyId!).order("created_at", { ascending: false }).limit(6),
