@@ -39,7 +39,7 @@ function ProfilePage() {
       const path = `${u.user!.id}/avatar-${Date.now()}.${file.name.split(".").pop()}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 30); // 30 hari
       await supabase.from("profiles").update({ avatar_url: signed?.signedUrl ?? null }).eq("id", u.user!.id);
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["profile"] }); toast.success("Foto profil diperbarui"); },

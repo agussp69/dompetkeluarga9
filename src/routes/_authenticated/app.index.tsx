@@ -31,19 +31,19 @@ function useDashboardData(familyId: string | null | undefined) {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().slice(0, 10);
 
-      const twoYearsAgo = new Date(now.getFullYear() - 2, now.getMonth(), 1).toISOString().slice(0, 10);
-
-      const [allTxn, monthTxn, goals, recent, categories] = await Promise.all([
-        supabase.from("transactions").select("type, amount").eq("family_id", familyId!).gte("occurred_at", twoYearsAgo).limit(10000),
+      // Gunakan RPC server-side aggregate untuk saldo total (menghindari limit(10000))
+      const [totalsRes, monthTxn, goals, recent, categories] = await Promise.all([
+        supabase.rpc("get_family_totals", { p_family_id: familyId! }),
         supabase.from("transactions").select("type, amount, occurred_at, category_id").eq("family_id", familyId!).gte("occurred_at", sixMonthsAgo),
         supabase.from("savings_goals").select("id, name, target_amount, savings_contributions(amount)").eq("family_id", familyId!),
         supabase.from("transactions").select("id, type, amount, description, occurred_at, category_id, user_id, categories:category_id(name)").eq("family_id", familyId!).order("created_at", { ascending: false }).limit(6),
         supabase.from("categories").select("id, name, type").or(`is_global.eq.true,family_id.eq.${familyId}`),
       ]);
 
-      const txns = (allTxn.data ?? []) as { type: string; amount: number }[];
-      const totalIncome = txns.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-      const totalExpense = txns.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+      // Ambil saldo dari RPC aggregate (tidak load semua baris)
+      const totals = totalsRes.data?.[0] ?? { total_income: 0, total_expense: 0 };
+      const totalIncome = Number(totals.total_income);
+      const totalExpense = Number(totals.total_expense);
       const balance = totalIncome - totalExpense;
 
       const monthData = (monthTxn.data ?? []) as { type: string; amount: number; occurred_at: string; category_id: string | null }[];

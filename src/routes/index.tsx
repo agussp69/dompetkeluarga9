@@ -101,7 +101,7 @@ function Landing() {
                 { i: Wallet, t: "Pemasukan & Pengeluaran", d: "Pencatatan cepat dengan kategori siap pakai dan lampiran bukti." },
                 { i: PiggyBank, t: "Budget Bulanan", d: "Tetapkan pos anggaran dan dapatkan peringatan saat hampir habis." },
                 { i: Target, t: "Tabungan Impian", d: "Pantau progres dana darurat, liburan, rumah, hingga umrah." },
-                { i: BarChart3, t: "Laporan & Analisis", d: "Grafik cashflow, insight otomatis, dan ekspor PDF/Excel/CSV." },
+                { i: BarChart3, t: "Laporan & Analisis", d: "Grafik cashflow bulanan, insight otomatis, dan ekspor data ke CSV." },
                 { i: Users, t: "Multi-Anggota Keluarga", d: "Owner mengelola, anggota mencatat. Saldo dan laporan dibagi bersama." },
                 { i: Shield, t: "Aman & Privat", d: "Setiap keluarga terisolasi. Hak akses berbasis peran." },
               ].map((f, i) => (

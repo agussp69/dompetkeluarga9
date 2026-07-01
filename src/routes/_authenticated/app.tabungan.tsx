@@ -10,6 +10,10 @@ import { NumericInput } from "@/components/ui/numeric-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,14 +27,20 @@ export const Route = createFileRoute("/_authenticated/app/tabungan")({
 
 const ICONS: Record<string, any> = { Plane, Home, Car, GraduationCap, Heart, Shield, Target };
 
+// Tipe dialog aktif yang sedang terbuka untuk satu goal tertentu
+type ActiveDialog =
+  | { type: "edit"; goal: any }
+  | { type: "contrib"; goal: any }
+  | { type: "withdraw"; goal: any }
+  | { type: "delete"; goal: any }
+  | null;
+
 function SavingsPage() {
   const { data: profile } = useProfile();
   const familyId = profile?.active_family_id;
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [contribFor, setContribFor] = useState<any>(null);
-  const [withdrawFor, setWithdrawFor] = useState<any>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
 
   const { data: goals = [] } = useQuery({
     enabled: !!familyId,
@@ -50,7 +60,13 @@ function SavingsPage() {
       const { error } = await supabase.from("savings_goals").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["goals"] }); toast.success("Target dihapus"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Target dihapus");
+      setActiveDialog(null);
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   return (
@@ -60,9 +76,11 @@ function SavingsPage() {
         title="Tabungan Impian"
         description="Catat impian keluarga dan pantau progresnya bersama."
         action={
-          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
-            <DialogTrigger asChild><Button onClick={() => setEditing(null)}><Plus className="mr-1 h-4 w-4" />Tambah Target</Button></DialogTrigger>
-            <GoalDialog familyId={familyId!} editing={editing} onDone={() => setOpen(false)} />
+          <Dialog open={addOpen} onOpenChange={(v) => setAddOpen(v)}>
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-1 h-4 w-4" />Tambah Target</Button>
+            </DialogTrigger>
+            <GoalDialog familyId={familyId!} editing={null} onDone={() => setAddOpen(false)} />
           </Dialog>
         }
       />
@@ -93,8 +111,29 @@ function SavingsPage() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditing(g); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => delMut.mutate(g.id)}><Trash2 className="h-4 w-4" /></Button>
+                    {/* Edit */}
+                    <Dialog
+                      open={activeDialog?.type === "edit" && activeDialog.goal.id === g.id}
+                      onOpenChange={(v) => setActiveDialog(v ? { type: "edit", goal: g } : null)}
+                    >
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+                      </DialogTrigger>
+                      <GoalDialog
+                        familyId={familyId!}
+                        editing={g}
+                        onDone={() => setActiveDialog(null)}
+                      />
+                    </Dialog>
+
+                    {/* Delete — dengan AlertDialog konfirmasi */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setActiveDialog({ type: "delete", goal: g })}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -112,22 +151,30 @@ function SavingsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <Dialog>
+                  {/* Kontribusi */}
+                  <Dialog
+                    open={activeDialog?.type === "contrib" && activeDialog.goal.id === g.id}
+                    onOpenChange={(v) => setActiveDialog(v ? { type: "contrib", goal: g } : null)}
+                  >
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1 text-xs sm:text-sm" onClick={() => setContribFor(g)}>
+                      <Button variant="outline" className="flex-1 text-xs sm:text-sm">
                         <Plus className="mr-1 h-4 w-4" />Kontribusi
                       </Button>
                     </DialogTrigger>
-                    {contribFor?.id === g.id ? <ContribDialog goal={g} onDone={() => setContribFor(null)} /> : null}
+                    <ContribDialog goal={g} onDone={() => setActiveDialog(null)} />
                   </Dialog>
 
-                  <Dialog>
+                  {/* Tarik Dana */}
+                  <Dialog
+                    open={activeDialog?.type === "withdraw" && activeDialog.goal.id === g.id}
+                    onOpenChange={(v) => setActiveDialog(v ? { type: "withdraw", goal: g } : null)}
+                  >
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1 text-xs sm:text-sm text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setWithdrawFor(g)}>
+                      <Button variant="outline" className="flex-1 text-xs sm:text-sm text-destructive border-destructive/30 hover:bg-destructive/10">
                         <Minus className="mr-1 h-4 w-4" />Tarik Dana
                       </Button>
                     </DialogTrigger>
-                    {withdrawFor?.id === g.id ? <WithdrawDialog goal={g} onDone={() => setWithdrawFor(null)} /> : null}
+                    <WithdrawDialog goal={g} onDone={() => setActiveDialog(null)} />
                   </Dialog>
                 </div>
               </div>
@@ -135,6 +182,34 @@ function SavingsPage() {
           })}
         </div>
       )}
+
+      {/* AlertDialog konfirmasi hapus goal */}
+      <AlertDialog
+        open={activeDialog?.type === "delete"}
+        onOpenChange={(v) => { if (!v) setActiveDialog(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus target tabungan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Target <strong>{activeDialog?.type === "delete" ? activeDialog.goal.name : ""}</strong> beserta
+              seluruh riwayat kontribusinya akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (activeDialog?.type === "delete") delMut.mutate(activeDialog.goal.id);
+              }}
+              disabled={delMut.isPending}
+            >
+              {delMut.isPending ? "Menghapus..." : "Ya, Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }

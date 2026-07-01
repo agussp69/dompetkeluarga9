@@ -587,6 +587,21 @@ export type Database = {
         Args: { _family_id: string; _user_id: string }
         Returns: boolean
       }
+      get_family_totals: {
+        Args: { p_family_id: string }
+        Returns: {
+          total_income: number
+          total_expense: number
+        }[]
+      }
+      get_admin_monthly_report: {
+        Args: { p_from?: string }
+        Returns: {
+          month_key: string
+          total_income: number
+          total_expense: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "owner" | "anggota"

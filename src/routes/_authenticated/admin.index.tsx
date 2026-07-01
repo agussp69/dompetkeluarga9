@@ -21,17 +21,20 @@ function AdminDashboard() {
   const { data } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [users, fams, txns, audit] = await Promise.all([
+      const [users, fams, txnCount, totalAmounts, audit] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("families").select("id", { count: "exact", head: true }),
-        supabase.from("transactions").select("amount, type"),
+        supabase.from("transactions").select("id", { count: "exact", head: true }),
+        // Gunakan RPC aggregate — tidak load semua baris transaksi
+        supabase.rpc("get_admin_monthly_report"),
         supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(8),
       ]);
-      const totalAmount = (txns.data ?? []).reduce((s: number, t: any) => s + Number(t.amount), 0);
+      const rows = (totalAmounts.data ?? []) as { total_income: number; total_expense: number }[];
+      const totalAmount = rows.reduce((s, r) => s + Number(r.total_income) + Number(r.total_expense), 0);
       return {
         users: users.count ?? 0,
         fams: fams.count ?? 0,
-        txnCount: (txns.data ?? []).length,
+        txnCount: txnCount.count ?? 0,
         totalAmount,
         audit: audit.data ?? [],
       };

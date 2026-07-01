@@ -1,13 +1,14 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, PiggyBank, Target,
   History, BarChart3, Bell, Users, User, Settings, LogOut, Shield,
-  Wallet, Menu, X,
+  Wallet, Menu, X, Sun, Moon,
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile, useIsAdmin } from "@/hooks/use-profile";
+import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ const NAV = [
   { to: "/app/tabungan", label: "Tabungan Impian", icon: Target },
   { to: "/app/laporan", label: "Laporan", icon: BarChart3 },
   { to: "/app/riwayat", label: "Riwayat", icon: History },
-  { to: "/app/notifikasi", label: "Notifikasi", icon: Bell },
+  { to: "/app/notifikasi", label: "Notifikasi", icon: Bell, badge: true },
   { to: "/app/keluarga", label: "Anggota Keluarga", icon: Users },
   { to: "/app/profil", label: "Profil", icon: User },
   { to: "/app/pengaturan", label: "Pengaturan", icon: Settings },
@@ -40,6 +41,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isDark, toggle } = useTheme();
+
+  // Badge: hitung notifikasi belum dibaca
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["notifications-unread"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null);
+      return count ?? 0;
+    },
+    refetchInterval: 60_000, // refresh setiap 1 menit
+  });
 
   const handleSignOut = async () => {
     await qc.cancelQueries();
@@ -61,9 +76,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <span className="font-display text-base font-semibold">Dompet Keluarga</span>
         </div>
-        <button onClick={() => setMobileOpen(v => !v)} className="rounded-md border border-border p-2">
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Dark mode toggle — mobile */}
+          <button
+            onClick={toggle}
+            aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+            className="rounded-md border border-border p-2 transition-colors hover:bg-accent"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <button onClick={() => setMobileOpen(v => !v)} className="rounded-md border border-border p-2">
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </header>
 
       <div className="flex">
@@ -91,6 +116,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   const isActive = item.to === "/app"
                     ? location.pathname === "/app"
                     : location.pathname.startsWith(item.to);
+                  const showBadge = "badge" in item && item.badge && unreadCount > 0;
                   return (
                     <li key={item.to}>
                       <Link
@@ -103,7 +129,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                             : "text-sidebar-foreground hover:bg-sidebar-accent"
                         )}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="relative shrink-0">
+                          <item.icon className="h-4 w-4" />
+                          {showBadge ? (
+                            <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white leading-none">
+                              {unreadCount > 9 ? "9+" : unreadCount}
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="truncate">{item.label}</span>
                       </Link>
                     </li>
@@ -139,6 +172,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <div className="truncate text-sm font-medium">{profile?.full_name ?? "Pengguna"}</div>
                   <div className="truncate text-xs text-muted-foreground">{profile?.email}</div>
                 </div>
+                {/* Dark mode toggle — desktop sidebar */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggle}
+                  aria-label={isDark ? "Mode terang" : "Mode gelap"}
+                  title={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+                >
+                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
                 <Button variant="ghost" size="icon" onClick={handleSignOut} title="Keluar">
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -199,6 +242,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+
 
 export function PageHeader({
   eyebrow, title, description, action,
