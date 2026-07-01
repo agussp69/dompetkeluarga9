@@ -113,19 +113,9 @@ export function TransactionPage({ type }: { type: "income" | "expense" }) {
         }
       />
 
-      <div className="mb-6 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
-        <div className="bg-card p-5">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total</p>
-          <p className={`mt-2 font-display text-2xl font-semibold ${isIncome ? "text-success" : "text-destructive"}`}>{formatIDR(total)}</p>
-        </div>
-        <div className="bg-card p-5">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Jumlah Transaksi</p>
-          <p className="mt-2 font-display text-2xl font-semibold">{txns.length}</p>
-        </div>
-        <div className="bg-card p-5">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Rata-rata</p>
-          <p className="mt-2 font-display text-2xl font-semibold">{formatIDR(txns.length ? total / txns.length : 0)}</p>
-        </div>
+      <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card p-5">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total</p>
+        <p className={`mt-2 font-display text-2xl font-semibold ${isIncome ? "text-success" : "text-destructive"}`}>{formatIDR(total)}</p>
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">

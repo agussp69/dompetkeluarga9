@@ -168,3 +168,26 @@
 @utility swiss-rule {
   border-top: 1px solid var(--color-border);
 }
+
+/* Mobile & PWA Optimizations */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .safe-pt {
+    padding-top: env(safe-area-inset-top, 16px);
+  }
+}
+
+/* Prevent iOS browser auto-zooming on inputs less than 16px */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

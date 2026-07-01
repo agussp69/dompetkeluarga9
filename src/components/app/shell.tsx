@@ -26,6 +26,13 @@ const NAV = [
   { to: "/app/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
 
+const BOTTOM_NAV = [
+  { to: "/app", label: "Dasbor", icon: LayoutDashboard },
+  { to: "/app/pemasukan", label: "Pemasukan", icon: ArrowDownCircle },
+  { to: "/app/pengeluaran", label: "Pengeluaran", icon: ArrowUpCircle },
+  { to: "/app/tabungan", label: "Tabungan", icon: Target },
+] as const;
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: profile } = useProfile();
   const { data: isAdmin } = useIsAdmin();
@@ -145,12 +152,50 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" />
         ) : null}
 
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 pb-20 lg:pb-0">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Bottom Navigation for Mobile Devices */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] lg:hidden">
+        <div className="flex h-16 items-center justify-around px-2">
+          {BOTTOM_NAV.map((item) => {
+            const isActive = item.to === "/app"
+              ? location.pathname === "/app"
+              : location.pathname.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium transition-colors",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5 mb-1" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium transition-colors",
+              mobileOpen
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Menu className="h-5 w-5 mb-1" />
+            <span>Menu</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
@@ -164,14 +209,14 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-border pb-6">
+    <div className="mb-8 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
           <p className="mb-2 font-display text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="truncate font-display text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}

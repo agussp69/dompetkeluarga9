@@ -67,7 +67,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Dompet Keluarga — Kelola Keuangan Keluarga Bersama" },
       { name: "description", content: "Aplikasi pencatatan dan pengelolaan keuangan keluarga: pemasukan, pengeluaran, anggaran bulanan, dan tabungan impian." },
       { name: "author", content: "Dompet Keluarga" },
@@ -77,9 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Dompet Keluarga — Kelola Keuangan Keluarga Bersama" },
       { name: "twitter:description", content: "Aplikasi pencatatan dan pengelolaan keuangan keluarga: pemasukan, pengeluaran, anggaran bulanan, dan tabungan impian." },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "theme-color", content: "#0f172a" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/logo.png" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/pwa-192x192.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -119,6 +124,20 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .then((reg) => {
+            console.log("ServiceWorker registered successfully: ", reg.scope);
+          })
+          .catch((err) => {
+            console.error("ServiceWorker registration failed: ", err);
+          });
+      });
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
