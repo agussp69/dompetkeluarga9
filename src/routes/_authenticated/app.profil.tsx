@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { compressProfileImage } from "@/lib/image";
+
 
 export const Route = createFileRoute("/_authenticated/app/profil")({
   head: () => ({ meta: [{ title: "Profil · Dompet Keluarga" }] }),
@@ -35,14 +37,29 @@ function ProfilePage() {
 
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
+      const { file: processedFile, originalSize, compressedSize, compressed } = await compressProfileImage(file);
       const { data: u } = await supabase.auth.getUser();
-      const path = `${u.user!.id}/avatar-${Date.now()}.${file.name.split(".").pop()}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const path = `${u.user!.id}/avatar-${Date.now()}.${processedFile.name.split(".").pop()}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, processedFile, { upsert: true });
       if (upErr) throw upErr;
       const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 30); // 30 hari
       await supabase.from("profiles").update({ avatar_url: signed?.signedUrl ?? null }).eq("id", u.user!.id);
+      return { originalSize, compressedSize, compressed };
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["profile"] }); toast.success("Foto profil diperbarui"); },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      if (data.compressed) {
+        const formatSize = (bytes: number) => {
+          if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+          return `${(bytes / 1024).toFixed(0)} KB`;
+        };
+        const beforeStr = formatSize(data.originalSize);
+        const afterStr = formatSize(data.compressedSize);
+        toast.success(`Foto profil diperbarui (Dikompresi: ${beforeStr} → ${afterStr})`);
+      } else {
+        toast.success("Foto profil diperbarui");
+      }
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
