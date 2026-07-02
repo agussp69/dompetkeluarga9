@@ -43,12 +43,35 @@ function createSupabaseClient() {
     throw new Error(message);
   }
 
+  const customStorage = {
+    getItem: (key: string) => {
+      if (typeof window === 'undefined') return null;
+      return localStorage.getItem(key) || sessionStorage.getItem(key);
+    },
+    setItem: (key: string, value: string) => {
+      if (typeof window === 'undefined') return;
+      const useSession = sessionStorage.getItem("dk_use_session_storage") === "true";
+      if (useSession) {
+        localStorage.removeItem(key);
+        sessionStorage.setItem(key, value);
+      } else {
+        sessionStorage.removeItem(key);
+        localStorage.setItem(key, value);
+      }
+    },
+    removeItem: (key: string) => {
+      if (typeof window === 'undefined') return;
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
     },
     auth: {
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: typeof window !== 'undefined' ? customStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
     }

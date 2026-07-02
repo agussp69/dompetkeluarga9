@@ -187,22 +187,14 @@ function LoginForm() {
       return;
     }
     setLoading(true);
-    // B3 Fix: Gunakan persistSession (default true) — untuk remember=false
-    // kita hapus token dari localStorage setelah login agar session tidak persisten
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("dk_use_session_storage", (!remember).toString());
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error(error.message === "Invalid login credentials" ? "Email atau password salah" : error.message);
       return;
-    }
-    if (!remember) {
-      // Pindahkan session dari localStorage ke sessionStorage
-      // sehingga sesi berakhir saat browser/tab ditutup
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        localStorage.removeItem(`sb-${new URL(import.meta.env.VITE_SUPABASE_URL ?? "").hostname.split(".")[0]}-auth-token`);
-        sessionStorage.setItem("dk_temp_session", JSON.stringify(session));
-      }
     }
     // B1 Fix: Proses undangan yang tertunda setelah login berhasil
     await processPendingInvitation();
@@ -256,6 +248,9 @@ function RegisterForm() {
       return;
     }
     setLoading(true);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("dk_use_session_storage", "false");
+    }
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
